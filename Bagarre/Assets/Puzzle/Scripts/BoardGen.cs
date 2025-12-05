@@ -19,7 +19,7 @@ public class BoardGen : MonoBehaviour
   public int numTileY { get; private set; }
 
   Tile[,] mTiles = null;
-  GameObject[,] mTileGameObjects= null;
+  GameObject[,] mTileGameObjects = null;
 
   public Transform parentForTiles = null;
 
@@ -110,18 +110,18 @@ public class BoardGen : MonoBehaviour
   {
     Texture2D newTex = new Texture2D(
       tex.width,
-      tex.height, 
-      TextureFormat.ARGB32, 
+      tex.height,
+      TextureFormat.ARGB32,
       false);
 
-    for(int x = 0; x < newTex.width; x++)
+    for (int x = 0; x < newTex.width; x++)
     {
-      for(int y = 0; y < newTex.height; y++)
+      for (int y = 0; y < newTex.height; y++)
       {
         Color c = tex.GetPixel(x, y);
-        if(x > Tile.padding && 
+        if (x > Tile.padding &&
            x < (newTex.width - Tile.padding) &&
-           y > Tile.padding && 
+           y > Tile.padding &&
            y < (newTex.height - Tile.padding))
         {
           c.a = ghostTransparency;
@@ -182,13 +182,13 @@ public class BoardGen : MonoBehaviour
     mTiles = new Tile[numTileX, numTileY];
     mTileGameObjects = new GameObject[numTileX, numTileY];
 
-    for(int i = 0; i < numTileX; i++)
+    for (int i = 0; i < numTileX; i++)
     {
-      for(int j = 0; j < numTileY; j++)
+      for (int j = 0; j < numTileY; j++)
       {
         mTiles[i, j] = CreateTile(i, j, baseTexture);
         mTileGameObjects[i, j] = CreateGameObjectFromTile(mTiles[i, j]);
-        if(parentForTiles != null)
+        if (parentForTiles != null)
         {
           mTileGameObjects[i, j].transform.SetParent(parentForTiles);
         }
@@ -272,7 +272,7 @@ public class BoardGen : MonoBehaviour
     else
     {
       float toss = UnityEngine.Random.Range(0f, 1f);
-      if(toss < 0.5f)
+      if (toss < 0.5f)
       {
         tile.SetCurveType(Tile.Direction.RIGHT, Tile.PosNegType.POS);
       }
@@ -283,7 +283,7 @@ public class BoardGen : MonoBehaviour
     }
 
     // Up side tile.
-    if(j == numTileY - 1)
+    if (j == numTileY - 1)
     {
       tile.SetCurveType(Tile.Direction.UP, Tile.PosNegType.NONE);
     }
@@ -317,7 +317,7 @@ public class BoardGen : MonoBehaviour
   {
     float elaspedTime = 0.0f;
     Vector3 startingPosition = objectToMove.transform.position;
-    while(elaspedTime < seconds)
+    while (elaspedTime < seconds)
     {
       objectToMove.transform.position = Vector3.Lerp(
         startingPosition, end, (elaspedTime / seconds));
@@ -330,10 +330,10 @@ public class BoardGen : MonoBehaviour
 
   void Shuffle(GameObject obj)
   {
-    if(regions.Count == 0)
+    if (regions.Count == 0)
     {
       regions.Add(new Rect(-300.0f, -100.0f, 50.0f, numTileY * Tile.tileSize));
-      regions.Add(new Rect((numTileX+1) * Tile.tileSize, -100.0f, 50.0f, numTileY * Tile.tileSize));
+      regions.Add(new Rect((numTileX + 1) * Tile.tileSize, -100.0f, 50.0f, numTileY * Tile.tileSize));
     }
 
     int regionIndex = UnityEngine.Random.Range(0, regions.Count);
@@ -347,18 +347,18 @@ public class BoardGen : MonoBehaviour
 
   IEnumerator Coroutine_Shuffle()
   {
-    for(int i = 0; i < numTileX; ++i)
+    for (int i = 0; i < numTileX; ++i)
     {
-      for(int j = 0; j < numTileY; ++j)
+      for (int j = 0; j < numTileY; ++j)
       {
         Shuffle(mTileGameObjects[i, j]);
         yield return null;
       }
     }
 
-    foreach(var item in activeCoroutines)
+    foreach (var item in activeCoroutines)
     {
-      if(item != null)
+      if (item != null)
       {
         yield return null;
       }
@@ -382,9 +382,9 @@ public class BoardGen : MonoBehaviour
 
     StartTimer();
 
-    for(int i = 0; i < numTileX; ++i)
+    for (int i = 0; i < numTileX; ++i)
     {
-      for(int j = 0; j < numTileY; ++j)
+      for (int j = 0; j < numTileY; ++j)
       {
         TileMovement tm = mTileGameObjects[i, j].GetComponent<TileMovement>();
         tm.onTileInPlace += OnTileInPlace;
@@ -410,7 +410,7 @@ public class BoardGen : MonoBehaviour
 
   IEnumerator Coroutine_Timer()
   {
-    while(true)
+    while (true)
     {
       yield return new WaitForSeconds(1.0f);
       GameApp.Instance.SecondsSinceStart += 1;
