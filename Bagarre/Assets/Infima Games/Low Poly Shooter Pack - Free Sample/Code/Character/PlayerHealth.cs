@@ -26,9 +26,8 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        Debug.Log(CurrentHealth);
+        Debug.Log("vie : " + CurrentHealth);
         CurrentHealth -= damage;
-        Debug.Log("zombie damage " + CurrentHealth);
         barreDeVie.SetHealth(CurrentHealth);
 
         if (hurtSound != null)
@@ -44,26 +43,17 @@ public class PlayerHealth : MonoBehaviour
         if (CurrentHealth <= 0)
         {
             Debug.Log("Le joueur est mort");
-
-            // Sauvegarder le score actuel
-            PlayerPrefs.SetInt("LastScore", ScoreManager.instance.score);
-            PlayerPrefs.Save();
-
-            // Charger la scène GameOver
-            SceneManager.LoadScene("GameOver");
+            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
         }
+
     }
 
-    void OnTriggerEnter(Collider other)
+    void OnCollisionEnter(Collision collision)
     {
-        if (other.CompareTag("bullet"))
+        if (collision.gameObject.CompareTag("bullet"))
         {
-            Debug.Log("Le joueur a été touché (trigger)");
+            Debug.Log("Le joueur a été touché");
             TakeDamage(1);
-
-            // optionnel : détruire la balle
-            Destroy(other.gameObject);
         }
     }
-
 }
