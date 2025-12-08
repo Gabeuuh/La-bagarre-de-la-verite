@@ -1,8 +1,7 @@
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.XR.Hands;
 
-namespace Unity.VRTemplate
+namespace UnityEngine.XR.Templates.MR
 {
     /// <summary>
     /// This class is a convenience wrapper to handle external start/stop
