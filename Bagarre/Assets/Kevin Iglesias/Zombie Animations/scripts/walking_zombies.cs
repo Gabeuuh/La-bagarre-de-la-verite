@@ -1,100 +1,134 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
-public class walking_zombies : MonoBehaviour
+public class ZombieHealth : MonoBehaviour
 {
-    public int MaxHealth = 5;
-    public int CurrentHealth;
-    public float WalkSpeed = 5;
-    public Transform target;
-    public healtbar healthBar;
+    [Header("Vie")]
+    public int maxHealth = 5;
+    public int currentHealth;
 
+    public BarreDeVie barreDeVie;          // même système que ton boss
+
+    [Header("Déplacement vers le joueur")]
+    public float walkSpeed = 5f;
+    public Transform target;
+
+    [Header("Audio")]
+    public AudioClip hurtSound;
+    public AudioClip deathSound;
+
+    [Header("FX de mort")]
     public GameObject deathEffectPrefab;
-    public AudioClip deathSound; // 🎵 Ajouté pour le son de mort
+
+    private AudioSource audioSource;
     private bool isDead = false;
 
     void Start()
     {
-        target = GameObject.FindGameObjectWithTag("Player").transform;
-        CurrentHealth = 0;
-        healthBar.SetMaxHealt(MaxHealth);
-    }
+        // Cible = joueur (XR Origin / Player)
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+            target = player.transform;
 
-    void TakeDamage(int damage)
-    {
-        if (isDead) return;
+        // Vie de départ
+        currentHealth = maxHealth;
 
-        Debug.Log(CurrentHealth);
-        CurrentHealth += damage;
-        Debug.Log("après coup" + CurrentHealth);
-        healthBar.SetHealt(CurrentHealth);
-
-        if (CurrentHealth >= MaxHealth)
+        if (barreDeVie != null)
         {
-            ScoreManager.instance.AddPoint();
-            PlayDeathEffect();
-        }
-    }
-
-    void PlayDeathEffect()
-    {
-        isDead = true;
-
-        if (deathSound != null)
-        {
-            AudioSource.PlayClipAtPoint(deathSound, transform.position); // 🔊 joue indépendamment du zombie
+            barreDeVie.SetMaxHealth(maxHealth);
+            barreDeVie.SetHealth(currentHealth);
         }
 
-        if (deathEffectPrefab != null)
-        {
-            Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
-        }
-
-        Destroy(gameObject); // détruit tout de suite
-    }
-
-    void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.CompareTag("LoveBullet"))
-        {
-            Debug.Log("Touché !");
-            TakeDamage(1);
-            Destroy(collision.gameObject);
-        }
+        // AudioSource comme sur le boss
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
     }
 
     void Update()
     {
         if (isDead) return;
 
+        // 🔁 Déplacement : même logique que ton ancien walking_zombies
         if (target != null)
         {
-            transform.position = Vector3.MoveTowards(transform.position, target.position, WalkSpeed * Time.deltaTime);
+            // avance vers le joueur
+            transform.position = Vector3.MoveTowards(
+                transform.position,
+                target.position,
+                walkSpeed * Time.deltaTime
+            );
 
+            // regarde le joueur
             Quaternion targetRotation = Quaternion.LookRotation(target.position - transform.position);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * 5f);
+            transform.rotation = Quaternion.Slerp(
+                transform.rotation,
+                targetRotation,
+                Time.deltaTime * 5f
+            );
         }
     }
 
-    public class ZombieDamage : MonoBehaviour
+    // =============================
+    //      GESTION DES DÉGÂTS
+    // =============================
+    public void TakeDamage(int damage)
     {
-        public int damage = 1;
+        if (isDead) return;
+
+        Debug.Log("Vie zombie avant coup : " + currentHealth);
+        currentHealth -= damage;
+        Debug.Log("Vie zombie après coup : " + currentHealth);
+
+        if (barreDeVie != null)
+            barreDeVie.SetHealth(currentHealth);
+
+        if (hurtSound != null)
+            audioSource.PlayOneShot(hurtSound);
+
+        if (currentHealth <= 0)
+        {
+            Die();
+        }
     }
 
-    public int damage = 1;
-
-    void OnCollisionEnterPlayer(Collision collision)
+    void Die()
     {
-        if (collision.gameObject.CompareTag("Player"))
-        {
-            Debug.Log("Le zombie a touché le joueur");
+        isDead = true;
+        Debug.Log("Zombie mort");
 
-            PlayerHealth playerHealth = collision.gameObject.GetComponent<PlayerHealth>();
-            if (playerHealth != null)
-            {
-                playerHealth.TakeDamage(damage);
-            }
+        if (deathSound != null)
+            AudioSource.PlayClipAtPoint(deathSound, transform.position);
+
+        if (deathEffectPrefab != null)
+            Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
+
+        // Si tu utilises toujours ton score manager
+        if (ScoreManager.instance != null)
+            ScoreManager.instance.AddPoint();
+
+        Destroy(gameObject);
+    }
+
+    // =============================
+    //  COLLISIONS (comme le boss)
+    // =============================
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("glove"))
+        {
+            Debug.Log("Zombie touché par le gant !");
+            TakeDamage(1);
+        }
+
+        if (other.CompareTag("projectile"))
+        {
+            Debug.Log("Zombie touché par un projectile !");
+            TakeDamage(1);
+        }
+        if (other.CompareTag("bullet"))
+        {
+            Debug.Log("Le boss a été touché par un projectile");
+            TakeDamage(1);
         }
     }
 }

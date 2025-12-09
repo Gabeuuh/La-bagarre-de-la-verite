@@ -6,7 +6,9 @@ public class AutoShooter : MonoBehaviour
     [Header("Tir")]
     public GameObject bulletPrefab;
     public Transform firePoint;
-    public float fireDelay = 0.1f; // toutes les 0.1s pour le test
+    public float fireDelay = 0.1f;
+    public AudioClip ShotSound;
+    // toutes les 0.1s pour le test
 
     void Start()
     {
@@ -40,6 +42,7 @@ public class AutoShooter : MonoBehaviour
             return;
         }
 
+        AudioSource.PlayClipAtPoint(ShotSound, transform.position);
         GameObject bullet = Instantiate(
     bulletPrefab,
     firePoint.position,

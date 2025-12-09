@@ -8,6 +8,8 @@ TagManager:
   - bullet
   - glove
   - projectile
+  - Zombie
+  - Cop
   layers:
   - Default
   - TransparentFX

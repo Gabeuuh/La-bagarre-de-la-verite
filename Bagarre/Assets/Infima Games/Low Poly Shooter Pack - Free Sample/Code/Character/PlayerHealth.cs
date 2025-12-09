@@ -54,5 +54,9 @@ public class PlayerHealth : MonoBehaviour
         {
             TakeDamage(1);
         }
+        if (collision.gameObject.CompareTag("Zombie"))
+        {
+            TakeDamage(1);
+        }
     }
 }

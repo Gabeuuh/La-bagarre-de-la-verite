@@ -27,6 +27,16 @@ public class Bullet : MonoBehaviour
             Debug.Log("Hit Player, bullet détruite");
             Destroy(gameObject);
         }
+        if (collision.gameObject.CompareTag("Zombie"))
+        {
+            Debug.Log("Bullet hit Zombie");
+            Destroy(gameObject);
+        }
+        if (collision.gameObject.CompareTag("Cop"))
+        {
+            Debug.Log("Bullet hit Cop");
+            Destroy(gameObject);
+        }
         // sinon : ne rien faire → laisse la balle continuer
         // elle se détruira à maxDistance
     }

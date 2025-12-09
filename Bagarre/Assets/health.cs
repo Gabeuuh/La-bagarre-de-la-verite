@@ -9,11 +9,16 @@ public class Health : MonoBehaviour
     public BarreDeVie barreDeVie;
     public AudioClip hurtSound;
     public AudioClip DeathSound;
+    public AudioClip SuccessSound;
 
     public GameObject explosionPrefab;
+    public GameObject Doors;
+    public AudioSource musicSource;
+
 
     private AudioSource audioSource;
     private CameraShake cameraShake;
+
 
     void Start()
     {
@@ -31,6 +36,12 @@ public class Health : MonoBehaviour
     {
         Debug.Log("Le Boss est mort");
 
+        if (musicSource != null)
+        {
+            musicSource.Stop();
+            Debug.Log("Musique arrêtée");
+        }
+
         if (DeathSound != null)
         {
             AudioSource.PlayClipAtPoint(DeathSound, transform.position);
@@ -43,6 +54,17 @@ public class Health : MonoBehaviour
 
         // Destroy le boss
         Destroy(gameObject);
+
+        if (SuccessSound != null)
+        {
+            AudioSource.PlayClipAtPoint(SuccessSound, Doors.transform.position);
+        }
+
+        if (explosionPrefab != null)
+        {
+            Instantiate(explosionPrefab, Doors.transform.position, Quaternion.identity);
+        }
+        Destroy(Doors);
     }
 
     public void TakeDamage(int damage)
@@ -73,9 +95,14 @@ public class Health : MonoBehaviour
         if (other.CompareTag("glove"))
         {
             Debug.Log("Le boss a été frappé ! ");
-            TakeDamage(3);
+            TakeDamage(2);
         }
         if (other.CompareTag("projectile"))
+        {
+            Debug.Log("Le boss a été touché par un projectile");
+            TakeDamage(1);
+        }
+        if (other.CompareTag("bullet"))
         {
             Debug.Log("Le boss a été touché par un projectile");
             TakeDamage(1);
