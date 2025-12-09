@@ -20,17 +20,17 @@ public class Menu : MonoBehaviour
   IEnumerator FadeInUI(GameObject panel, float fadeInDuration = 2.0f)
   {
     Graphic[] graphics = panel.GetComponentsInChildren<Graphic>();
-    foreach(Graphic graphic in graphics)
+    foreach (Graphic graphic in graphics)
     {
       graphic.color = new Color(graphic.color.r, graphic.color.g, graphic.color.b, 0.0f);
     }
 
     float timer = 0.0f;
-    while(timer < fadeInDuration)
+    while (timer < fadeInDuration)
     {
       timer += Time.deltaTime;
       float normalisedTime = timer / fadeInDuration;
-      foreach(Graphic graphic in graphics)
+      foreach (Graphic graphic in graphics)
       {
         graphic.color = new Color(graphic.color.r, graphic.color.g, graphic.color.b, normalisedTime);
       }
@@ -86,7 +86,7 @@ public class Menu : MonoBehaviour
   public void SetEnableGameCompletionPanel(bool flag)
   {
     panelGameCompletion.SetActive(flag);
-    if(flag)
+    if (flag)
     {
       FadeInUI(panelGameCompletion);
     }
@@ -101,4 +101,11 @@ public class Menu : MonoBehaviour
   {
     SceneManager.LoadScene("Scene_JigsawGame");
   }
+
+  // void Start()
+  // {
+  //   // On simule un clic sur le bouton Play dès le début
+  //   OnClickPlay();
+  // }
+
 }

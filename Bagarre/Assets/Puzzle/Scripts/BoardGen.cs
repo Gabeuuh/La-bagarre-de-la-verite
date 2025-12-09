@@ -23,6 +23,9 @@ public class BoardGen : MonoBehaviour
 
   public Transform parentForTiles = null;
 
+  public float tileWorldSize = 0.05f; // taille d'une tuile en unités monde (0.1 = 10 cm)
+
+
   // Access to the menu.
   public Menu menu = null;
   private List<Rect> regions = new List<Rect>();
@@ -142,14 +145,14 @@ public class BoardGen : MonoBehaviour
 
   void SetCameraPosition()
   {
-    Camera.main.transform.position = new Vector3(mBaseSpriteOpaque.texture.width / 2,
-      mBaseSpriteOpaque.texture.height / 2, -10.0f);
-    //Camera.main.orthographicSize = mBaseSpriteOpaque.texture.width / 2;
-    int smaller_value = Mathf.Min(mBaseSpriteOpaque.texture.width, mBaseSpriteOpaque.texture.height);
-    Camera.main.orthographicSize = smaller_value * 0.8f;
+    // Camera.main.transform.position = new Vector3(mBaseSpriteOpaque.texture.width / 2,
+    //   mBaseSpriteOpaque.texture.height / 2, -10.0f);
+    // //Camera.main.orthographicSize = mBaseSpriteOpaque.texture.width / 2;
+    // int smaller_value = Mathf.Min(mBaseSpriteOpaque.texture.width, mBaseSpriteOpaque.texture.height);
+    // Camera.main.orthographicSize = smaller_value * 0.8f;
   }
 
-  public static GameObject CreateGameObjectFromTile(Tile tile)
+  /* public static GameObject CreateGameObjectFromTile(Tile tile)
   {
     GameObject obj = new GameObject();
 
@@ -171,7 +174,57 @@ public class BoardGen : MonoBehaviour
     tileMovement.tile = tile;
 
     return obj;
+  } */
+
+  public GameObject CreateGameObjectFromTile(Tile tile)
+  {
+    GameObject obj = new GameObject();
+
+    obj.name = "TileGameObj_" + tile.xIndex.ToString() + "_" + tile.yIndex.ToString();
+
+    // Position en "coordonnées puzzle" (indices * taille monde)
+    Vector3 localPos = new Vector3(
+        tile.xIndex * tileWorldSize,
+        tile.yIndex * tileWorldSize,
+        0f
+    );
+
+    // Création du sprite
+    SpriteRenderer spriteRenderer = obj.AddComponent<SpriteRenderer>();
+    spriteRenderer.sprite = SpriteUtils.CreateSpriteFromTexture2D(
+      tile.finalCut,
+      0,
+      0,
+      Tile.padding * 2 + Tile.tileSize,
+      Tile.padding * 2 + Tile.tileSize
+    );
+
+    // Collider 3D (si tu pars sur la version VR grabbable),
+    // sinon laisse le 2D juste pour voir le puzzle.
+    BoxCollider box = obj.AddComponent<BoxCollider>();
+    var bounds = spriteRenderer.bounds;
+    box.size = new Vector3(bounds.size.x, bounds.size.y, 0.01f);
+
+    // IMPORTANT : parent & position
+    if (parentForTiles != null)
+    {
+      obj.transform.SetParent(parentForTiles, false); // false = on travaille en local
+      obj.transform.localPosition = localPos;
+    }
+    else
+    {
+      obj.transform.position = localPos;
+    }
+
+    // Ici, pour l’instant, si tu veux juste voir le puzzle,
+    // tu peux encore garder TileMovement (souris) ou passer à ton script VR.
+    // Pour debug visuel, garde TileMovement :
+    TileMovement tileMovement = obj.AddComponent<TileMovement>();
+    tileMovement.tile = tile;
+
+    return obj;
   }
+
 
   void CreateJigsawTiles()
   {
@@ -386,9 +439,10 @@ public class BoardGen : MonoBehaviour
     {
       for (int j = 0; j < numTileY; ++j)
       {
-        TileMovement tm = mTileGameObjects[i, j].GetComponent<TileMovement>();
-        tm.onTileInPlace += OnTileInPlace;
-        SpriteRenderer spriteRenderer = tm.gameObject.GetComponent<SpriteRenderer>();
+        TileVRInteraction ti = mTileGameObjects[i, j].GetComponent<TileVRInteraction>();
+        ti.onTileInPlace += OnTileInPlace;
+
+        SpriteRenderer spriteRenderer = ti.gameObject.GetComponent<SpriteRenderer>();
         Tile.tilesSorting.BringToTop(spriteRenderer);
       }
     }
@@ -436,26 +490,26 @@ public class BoardGen : MonoBehaviour
     mGameObjectOpaque.SetActive(false);
   }
 
-  void OnTileInPlace(TileMovement tm)
+  void OnTileInPlace(TileVRInteraction ti)
   {
     GameApp.Instance.TotalTilesInCorrectPosition += 1;
 
-    tm.enabled = false;
-    Destroy(tm);
+    // On ne détruit pas le composant : il est déjà désactivé dans TileVRInteraction
+    ti.enabled = false;
 
-    SpriteRenderer spriteRenderer = tm.gameObject.GetComponent<SpriteRenderer>();
+    SpriteRenderer spriteRenderer = ti.gameObject.GetComponent<SpriteRenderer>();
     Tile.tilesSorting.Remove(spriteRenderer);
 
     if (GameApp.Instance.TotalTilesInCorrectPosition == mTileGameObjects.Length)
     {
-      //Debug.Log("Game completed. We will implement an end screen later");
+      // Ici tu peux mettre ton code de victoire (UI, changement de scène, etc.)
       menu.SetEnableTopPanel(false);
       menu.SetEnableGameCompletionPanel(true);
 
-      // Reset the values.
       GameApp.Instance.SecondsSinceStart = 0;
       GameApp.Instance.TotalTilesInCorrectPosition = 0;
     }
+
     menu.SetTilesInPlace(GameApp.Instance.TotalTilesInCorrectPosition);
   }
 }
