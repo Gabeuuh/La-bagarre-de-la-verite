@@ -1,13 +1,16 @@
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class PlayerHealth : MonoBehaviour
+public class Health : MonoBehaviour
 {
     public int maxHealth = 5;
     public int CurrentHealth;
 
     public BarreDeVie barreDeVie;
     public AudioClip hurtSound;
+    public AudioClip DeathSound;
+
+    public GameObject explosionPrefab;
 
     private AudioSource audioSource;
     private CameraShake cameraShake;
@@ -24,9 +27,27 @@ public class PlayerHealth : MonoBehaviour
         cameraShake = Camera.main.GetComponent<CameraShake>();
     }
 
+    void Die()
+    {
+        Debug.Log("Le Boss est mort");
+
+        if (DeathSound != null)
+        {
+            AudioSource.PlayClipAtPoint(DeathSound, transform.position);
+        }
+        // Spawn FX
+        if (explosionPrefab != null)
+        {
+            Instantiate(explosionPrefab, transform.position, Quaternion.identity);
+        }
+
+        // Destroy le boss
+        Destroy(gameObject);
+    }
+
     public void TakeDamage(int damage)
     {
-        Debug.Log("vie du perso : " + CurrentHealth);
+        Debug.Log("vie du boss : " + CurrentHealth);
         CurrentHealth -= damage;
         barreDeVie.SetHealth(CurrentHealth);
 
@@ -42,17 +63,23 @@ public class PlayerHealth : MonoBehaviour
 
         if (CurrentHealth <= 0)
         {
-            Debug.Log("Le joueur est mort");
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+            Die();
         }
 
     }
 
-    void OnCollisionEnter(Collision collision)
+    void OnTriggerEnter(Collider other)
     {
-        if (collision.gameObject.CompareTag("bullet"))
+        if (other.CompareTag("glove"))
         {
+            Debug.Log("Le boss a été frappé ! ");
+            TakeDamage(3);
+        }
+        if (other.CompareTag("projectile"))
+        {
+            Debug.Log("Le boss a été touché par un projectile");
             TakeDamage(1);
         }
     }
+
 }
