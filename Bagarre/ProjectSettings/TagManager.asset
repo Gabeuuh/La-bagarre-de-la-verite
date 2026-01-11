@@ -12,7 +12,7 @@ TagManager:
   - 
   - Water
   - UI
-  - 
+  - PuzzleTiles
   - 
   - 
   - 
@@ -41,6 +41,9 @@ TagManager:
   m_SortingLayers:
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: PuzzleTiles
+    uniqueID: 1748382391
     locked: 0
   m_RenderingLayers:
   - Default
